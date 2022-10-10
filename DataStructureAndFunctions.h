@@ -50,4 +50,4 @@ snapshotProcess* addProcess(snapshot* snapshotPtr);
 dLL_Process* addDLL(snapshotProcess* ProcessPtr);
 snapshotProcess* getProcess(DWORD processID, snapshot* newSnapshot, snapshotProcess* currProcess);
 void addProcesses(unsigned int SnapshotsCount, snapshot* newSnapshot, snapshotProcess* currProcess);
-void printSnapshotProcesses(snapshot* snapshotPtr);
+void DllDealer(HANDLE hProcess, snapshotProcess* currentProcess);

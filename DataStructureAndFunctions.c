@@ -75,6 +75,7 @@ dLL_Process* addDLL(snapshotProcess* ProcessPtr) {
 	newDLL->next = NULL;
 	if (ProcessPtr->DLLhead == NULL)
 	{
+		newDLL->numberID = 1;
 		newDLL->prev = NULL;
 		ProcessPtr->DLLhead = newDLL;
 		ProcessPtr->DLLTail = newDLL;
@@ -83,10 +84,85 @@ dLL_Process* addDLL(snapshotProcess* ProcessPtr) {
 	{
 		ProcessPtr->DLLTail->next = newDLL;
 		newDLL->prev = ProcessPtr->DLLTail;
+		newDLL->numberID = newDLL->prev->numberID + 1;
 		ProcessPtr->DLLTail = newDLL;
 	}
 	return newDLL;
 }
+
+
+void DllDealer(HANDLE hProcess,snapshotProcess* currentProcess)
+{
+
+	DWORD cbNeeded;
+	HMODULE hMods[1024];
+	dLL_Process* dllChecker = currentProcess->DLLhead;
+	dLL_Process* newDLL;
+	unsigned int dllCount = 1;
+	char signal;
+
+	// Get Dlls List
+	if (EnumProcessModules(hProcess, hMods, sizeof(hMods), &cbNeeded))
+	{
+		TCHAR wDllName[MAX_PATH];
+
+		//if its the first dll in the list
+		if (dllChecker == NULL)
+		{
+			if (GetModuleFileNameEx(hProcess, hMods[0], wDllName, MAX_PATH))
+			{
+				// Convert to regular char array (string)
+				char dllName[MAX_PATH];
+				size_t numConverted;
+				wcstombs_s(&numConverted, dllName, MAX_PATH, wDllName, MAX_PATH);
+			
+				newDLL = addDLL(currentProcess);
+				strcpy(newDLL->Name, dllName);
+			}
+
+		}
+
+		for (int i = 0; i < (cbNeeded / sizeof(HMODULE)); i++)
+		{
+			// Get the full path to the module's file.
+
+			if (GetModuleFileNameEx(hProcess, hMods[i], wDllName, MAX_PATH))
+			{
+				dllCount = 1;
+				dllChecker = currentProcess->DLLhead;
+				// Convert to regular char array (string)
+				char dllName[MAX_PATH];
+				size_t numConverted;
+				wcstombs_s(&numConverted, dllName, MAX_PATH, wDllName, MAX_PATH);
+
+				// check if dll is in the list
+				while (dllCount <= currentProcess->DLLTail->numberID)
+				{
+
+					//the dll isnt in the list so create new dll struct and add it to the current process dll linked list
+					if (dllChecker == NULL)
+					{
+						newDLL = addDLL(currentProcess);
+						strcpy(newDLL->Name, dllName);
+						dllCount = newDLL->numberID + 1;
+					}
+					else if ((signal = strcmp(dllChecker->Name, dllName)) == 0) //found the dll in the dll list
+					{
+						signal = strcmp(dllChecker->Name, dllName);
+						dllCount = currentProcess->DLLTail->numberID + 1;
+						
+					}
+					else
+					{
+						dllChecker = dllChecker->next;
+					}
+					
+				}
+			}
+		}
+	}
+}
+
 
 // function to get a process information and insert it to current snapshot
 snapshotProcess* getProcess(DWORD processID, snapshot* newSnapshot, snapshotProcess* currProcess)
@@ -94,11 +170,8 @@ snapshotProcess* getProcess(DWORD processID, snapshot* newSnapshot, snapshotProc
 	
 	HANDLE hProcess;
 	PROCESS_MEMORY_COUNTERS pmc;
-	HMODULE hMods[1024];
-	DWORD cbNeeded;
 	TCHAR FoundProcessName[MAX_PATH];
-	TCHAR wDllName[MAX_PATH];
-	char FullPathName[MAX_PATH];
+	char ProcessPathName[MAX_PATH];
 
 	// Open process in order to receive information
 	hProcess = OpenProcess(PROCESS_QUERY_INFORMATION |
@@ -107,23 +180,22 @@ snapshotProcess* getProcess(DWORD processID, snapshot* newSnapshot, snapshotProc
 	if (NULL == hProcess)
 	{
 		// Write to log a warning 
-		return;
+		return currProcess;
 	}
 
 	// Get Process Name
-	
 	if (GetModuleFileNameEx(hProcess, 0, FoundProcessName, MAX_PATH))
 	{
 		// Convert to regular char array (string)
 		size_t numConverted;
-		wcstombs_s(&numConverted, FullPathName, MAX_PATH, FoundProcessName, MAX_PATH);
+		wcstombs_s(&numConverted, ProcessPathName, MAX_PATH, FoundProcessName, MAX_PATH);
 
 		// check if we got a name or not(more then 0 chars)
 		if (numConverted < 1)
 		{
 			// You better call GetLastError() here
 		    // Write To log
-			return;
+			return currProcess;
 		}
 	}
 	else
@@ -132,67 +204,61 @@ snapshotProcess* getProcess(DWORD processID, snapshot* newSnapshot, snapshotProc
 		// Write To log
 	}
 
-	//to check if its only one snapshot or sum NULL== one snapshot\first time
+	//to check if its only one snapshot or a sum: "NULL" = 1snapshot\first time
 	if(currProcess == NULL)
 	{
 	//if didnt returned meaning we can get all the information we want and function keep going
-	snapshotProcess* currentProcess = addProcess(newSnapshot);
-	strcpy(currentProcess->Name, FullPathName);
-
-	//get the process information and add it to the current process
+	snapshotProcess* newProcess = addProcess(newSnapshot);
+	strcpy(newProcess->Name, ProcessPathName);
+	
+	//get the process information and add it to the current process in the snapshot
 	if (GetProcessMemoryInfo(hProcess, &pmc, sizeof(pmc)))
 	{
-		currentProcess->ProcessInfo.cb += pmc.cb;
-		currentProcess->ProcessInfo.PageFaultCount += pmc.PageFaultCount;
-		currentProcess->ProcessInfo.PagefileUsage += pmc.PagefileUsage;
-		currentProcess->ProcessInfo.PeakPagefileUsage += pmc.PeakPagefileUsage;
-		currentProcess->ProcessInfo.PeakWorkingSetSize += pmc.PeakWorkingSetSize;
-		currentProcess->ProcessInfo.QuotaNonPagedPoolUsage += pmc.QuotaNonPagedPoolUsage;
-		currentProcess->ProcessInfo.QuotaPagedPoolUsage += pmc.QuotaPagedPoolUsage;
-		currentProcess->ProcessInfo.QuotaPeakNonPagedPoolUsage += pmc.QuotaPeakNonPagedPoolUsage;
-		currentProcess->ProcessInfo.QuotaPeakPagedPoolUsage += pmc.QuotaPeakPagedPoolUsage;
-		currentProcess->ProcessInfo.WorkingSetSize += pmc.WorkingSetSize;
-		currentProcess->ID = processID;
+		newProcess->ProcessInfo.cb += pmc.cb;
+		newProcess->ProcessInfo.PageFaultCount += pmc.PageFaultCount;
+		newProcess->ProcessInfo.PagefileUsage += pmc.PagefileUsage;
+		newProcess->ProcessInfo.PeakPagefileUsage += pmc.PeakPagefileUsage;
+		newProcess->ProcessInfo.PeakWorkingSetSize += pmc.PeakWorkingSetSize;
+		newProcess->ProcessInfo.QuotaNonPagedPoolUsage += pmc.QuotaNonPagedPoolUsage;
+		newProcess->ProcessInfo.QuotaPagedPoolUsage += pmc.QuotaPagedPoolUsage;
+		newProcess->ProcessInfo.QuotaPeakNonPagedPoolUsage += pmc.QuotaPeakNonPagedPoolUsage;
+		newProcess->ProcessInfo.QuotaPeakPagedPoolUsage += pmc.QuotaPeakPagedPoolUsage;
+		newProcess->ProcessInfo.WorkingSetSize += pmc.WorkingSetSize;
+		newProcess->ID = processID;
 	}
 
-	// Get Dlls List
-	if (EnumProcessModules(hProcess, hMods, sizeof(hMods), &cbNeeded))
-	{
+	//add the new process dll's list to the new process list
+	DllDealer(hProcess ,newProcess);
 
-		for (int i = 0; i < (cbNeeded / sizeof(HMODULE)); i++)
-		{
-			// Get the full path to the module's file.
-
-			if (GetModuleFileNameEx(hProcess, hMods[i], wDllName, MAX_PATH))
-			{
-				// create new dll and add it to the current process dll linked list
-				dLL_Process* newDLL = addDLL(currentProcess);
-
-				// Convert to regular char array (string)
-				char dllName[MAX_PATH];
-				size_t numConverted;
-				wcstombs_s(&numConverted, dllName, MAX_PATH, wDllName, MAX_PATH);
-
-				unsigned int tmp = 0;
-				tmp++;
-				strcpy(newDLL->Name, dllName);
-				newDLL->numberID = tmp;
-			}
-		}
-	}
 	CloseHandle(hProcess);
-	return currentProcess;
+	return newProcess;
 	}
+	
+	// to add information to an existed process
 	else
 	{
-		//to find the path process
 		currProcess = newSnapshot->processHead;
-		while (currProcess != NULL)
+		unsigned int processCount = 1;
+		char signal;
+
+		//to find the process in the snapshot
+		while (processCount <= newSnapshot->processTail->ID)
 		{
-			int signal;
-			signal = strcmp(currProcess->Name, FullPathName);
-			if (signal == 0)
+			
+			// if the Process isnt in the snapshot then adding it to current snapshot
+			if (currProcess == NULL)
 			{
+				getProcess(processID, newSnapshot, NULL);
+				processCount = newSnapshot->processTail->ID + 1;
+			}
+
+			//found the process in the process list
+			else if ((signal = strcmp(currProcess->Name, ProcessPathName)) == 0) 
+			{
+
+				//check for new dll's, if a DLL isnt in the Process list then adding it to current Process list
+				DllDealer(hProcess, currProcess);
+
 				if (GetProcessMemoryInfo(hProcess, &pmc, sizeof(pmc)))
 				{
 					currProcess->ProcessInfo.cb += pmc.cb;
@@ -207,17 +273,13 @@ snapshotProcess* getProcess(DWORD processID, snapshot* newSnapshot, snapshotProc
 					currProcess->ProcessInfo.WorkingSetSize += pmc.WorkingSetSize;
 					currProcess->ID = processID;
 				}
-				signal = 0;
+				processCount = newSnapshot->processTail->ID + 1;
 			}
-			currProcess = currProcess->next;
-
-			// if the path name isnt in the snapshot then adding it to current snapshot
-			if (currProcess == NULL)
+			else
 			{
-				getProcess(processID, newSnapshot, NULL);
+				currProcess = currProcess->next;
 			}
 		}
-	
 	CloseHandle(hProcess);
 	return currProcess;
 	}
