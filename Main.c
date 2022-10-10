@@ -77,7 +77,18 @@ int main()
 			break;
 
 		case 'R':
-		case 'r':;
+		case 'r':
+			printf("\n\nAre you sure you want to reset?: Y/N");
+			quit = getch();
+			if (quit == 'Y' || quit == 'y')
+			{
+				ResetSnapshots();
+				printf("\n\n Reset complete");
+			}
+			else if (quit == 'N' || quit == 'n')
+			{
+				printf("\n\n You choosed not to reset.. Press 'M' to open menu again");
+			}
 			break;
 
 		case 'S':
@@ -92,7 +103,7 @@ int main()
 		case 'm':
 			printf("\n\nPress 'A' to ADD 1 Snapshot \nPress 'B' to SUM 20 Snapshots\nPress 'X' to START a run of snapshots");
 			printf("\nPress 'V' to END the run of snapshots\nPress 'G' to Generate all snapshots to html file\nPress 'R' to RESET the snapshots list");
-			printf("\nPress 'S' to SAVE snapshots to file\nPress 'L' to LOAD snapshots list from file\nPress 'M' to Show menu\nPress 'quit' to quitUIT the programm: ");
+			printf("\nPress 'S' to SAVE snapshots to file\nPress 'L' to LOAD snapshots list from file\nPress 'M' to Show menu\nPress 'quit' to quit the programm: ");
 			break;
 
 		case 'Q':

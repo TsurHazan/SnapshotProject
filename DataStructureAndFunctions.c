@@ -320,3 +320,46 @@ void addProcesses(unsigned int SnapshotsCount, snapshot* newSnapshot,snapshotPro
 	Sleep(1000);
 	addProcesses(SnapshotsCount - 1, newSnapshot, currProcess);
 }
+
+
+//free and reset a process dll list
+void ResetDll(dLL_Process* currDllTail)
+{
+	dLL_Process* tempPtr;
+
+	while (currDllTail != NULL)
+	{
+		tempPtr = currDllTail;
+		currDllTail = currDllTail->prev;
+		free(tempPtr);
+	}
+
+}
+
+//free and reset a snapshot process list
+void ResetProcess(snapshotProcess* currProcessTail) {
+
+	snapshotProcess* tempPtr;
+
+	while (currProcessTail != NULL)
+	{
+		tempPtr = currProcessTail;
+		currProcessTail = currProcessTail->prev;
+		ResetDll(tempPtr->DLLTail);
+		free(tempPtr);
+	}
+}
+
+//free and reset all snapshots from bottom (dll) to top (the snapshot itself)
+void ResetSnapshots()
+{
+    snapshot* tempPtr;
+	while (snapshotTail != NULL)
+	{
+		tempPtr = snapshotTail;
+		snapshotTail = snapshotTail->prev;
+		ResetProcess(tempPtr->processTail);
+		free(tempPtr);
+	}
+	snapshotHead = NULL;
+}

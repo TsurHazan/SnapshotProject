@@ -51,3 +51,6 @@ dLL_Process* addDLL(snapshotProcess* ProcessPtr);
 snapshotProcess* getProcess(DWORD processID, snapshot* newSnapshot, snapshotProcess* currProcess);
 void addProcesses(unsigned int SnapshotsCount, snapshot* newSnapshot, snapshotProcess* currProcess);
 void DllDealer(HANDLE hProcess, snapshotProcess* currentProcess);
+void ResetSnapshots();
+void ResetProcess(snapshotProcess* currProcessTail);
+void ResetDll(dLL_Process* currDllTail);
