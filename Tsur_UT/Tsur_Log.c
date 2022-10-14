@@ -10,12 +10,20 @@ char FileAddress[1010];
 
 time_t timeForLog;
 
-char currentTime(char arr[10000]) {
+char currentTime(char* arr) {
 
 	time(&timeForLog);
 	struct tm* timeStructForLog = localtime(&timeForLog);
-	sprintf(arr, "%d/%d/%d:%d.%d.%d -", timeStructForLog->tm_year+1900, timeStructForLog->tm_mon+1, timeStructForLog->tm_mday, timeStructForLog->tm_hour,timeStructForLog->tm_min ,timeStructForLog->tm_sec);
+	sprintf(arr, "%d.%d.%d-%d.%d.%d", timeStructForLog->tm_year+1900, timeStructForLog->tm_mon+1, timeStructForLog->tm_mday, timeStructForLog->tm_hour,timeStructForLog->tm_min ,timeStructForLog->tm_sec);
 
+	return arr;
+}
+
+char ShortCurrentTime(char* arr) {
+
+	time(&timeForLog);
+	struct tm* timeStructForLog = localtime(&timeForLog);
+	sprintf(arr, "%d.%d.%d", timeStructForLog->tm_year + 1900, timeStructForLog->tm_mon + 1, timeStructForLog->tm_mday);
 	return arr;
 }
 
@@ -41,9 +49,9 @@ void Log_Init(char filename[1000]) {
 		sprintf(timeLog, "%s EVENT - Log file initialized\n", timeLog);
 		fputs(timeLog, fileOpener);
 		
-
+		fclose(fileOpener);
 	}
-	fclose(fileOpener);
+	
 }
 
 void Log_Error(char msg[1000]) {
@@ -65,9 +73,9 @@ void Log_Error(char msg[1000]) {
 	   currentTime(FullMsg);
 	   sprintf(FullMsg, "%s  ERROR - %s\n", FullMsg, msg);
 	   fputs(FullMsg, f);
-	   
+
+	   fclose(f);
    }
-   fclose(f);
    }
    
 void Log_Warning(char msg[1000]) {
@@ -90,8 +98,8 @@ void Log_Warning(char msg[1000]) {
 		sprintf(FullMsg, "%s  WARNING - %s\n", FullMsg, msg);
 		fputs(FullMsg, f);
 
+		fclose(f);
 	}
-	fclose(f);
 }
 
 void Log_Event(char msg[1000]) {
@@ -114,8 +122,7 @@ void Log_Event(char msg[1000]) {
 		currentTime(FullMsg);
 		sprintf(FullMsg, "%s  EVENT - %s\n", FullMsg, msg);
 		fputs(FullMsg, f);
-
+		fclose(f);
 	}
-	fclose(f);
 }
 

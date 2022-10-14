@@ -22,7 +22,8 @@ typedef struct DLL_Process
 typedef struct SnapshotProcess
 {
 	char Name[MAX_PATH];
-	int ID;
+	int ProcessID;
+	int ProcessPlace;
 	PROCESS_MEMORY_COUNTERS ProcessInfo;
 	dLL_Process* DLLhead;
 	dLL_Process* DLLTail;
@@ -34,7 +35,7 @@ typedef struct SnapshotProcess
 // Snapshot Struct
 typedef struct Snapshot {
 	char timeCreated[100];
-	unsigned int ID;
+    int ID;
 	snapshotProcess* processHead;
 	snapshotProcess* processTail;
 	struct Snapshot* next;
@@ -49,7 +50,7 @@ snapshot* addSnapshot();
 snapshotProcess* addProcess(snapshot* snapshotPtr);
 dLL_Process* addDLL(snapshotProcess* ProcessPtr);
 snapshotProcess* getProcess(DWORD processID, snapshot* newSnapshot, snapshotProcess* currProcess);
-void addProcesses(unsigned int SnapshotsCount, snapshot* newSnapshot, snapshotProcess* currProcess);
+void StartSnapshotCreation(unsigned int SnapshotsCount, snapshot* newSnapshot, snapshotProcess* currProcess);
 void DllDealer(HANDLE hProcess, snapshotProcess* currentProcess);
 void ResetSnapshots();
 void ResetProcess(snapshotProcess* currProcessTail);

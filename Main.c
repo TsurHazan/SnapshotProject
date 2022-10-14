@@ -7,6 +7,8 @@
 #include <Psapi.h>
 #include "Tsur_Log.h"
 #include "DataStructureAndFunctions.h"
+#include "HtmlTranslatorFile.h"
+
 #pragma warning(disable:4996)
 
 snapshot* snapshotHead = NULL;
@@ -24,6 +26,9 @@ int main()
 	printf("\nPress 'V' to END the run of snapshots\nPress 'G' to Generate all snapshots to html file\nPress 'R' to RESET the snapshots list");
 	printf("\nPress 'S' to SAVE snapshots to file\nPress 'L' to LOAD snapshots list from file\nPress 'M' to Show menu\nPress 'Q' to quit the programm: ");
 
+
+
+
 	//comfortable user response - no need to cap on\off **but keyboard must be on english
 	while (quit != 'Q' && quit != 'q')
 	{
@@ -36,20 +41,20 @@ int main()
 		case 'A':
 		case 'a': 
 			newSnapshot = addSnapshot();
-			addProcesses(1, newSnapshot,NULL);
-			printf("\nNew snapshot added");
+			StartSnapshotCreation(1, newSnapshot,NULL);
+			printf("\n\n+New snapshot added");
 			break;
 			
 		case 'B':
 		case 'b':
 			newSnapshot = addSnapshot();
-			addProcesses(20, newSnapshot,NULL);
-			printf("\n\nNew 20 processes sum snapshot added");
+			StartSnapshotCreation(20, newSnapshot,NULL);
+			printf("\n\n+New 20 processes sum snapshot added");
 			break;
 
 		case 'X':
 		case 'x':
-			printf("\n\nStrated a run");
+			printf("\n\n-Strated a run");
 			while (runAction <  1)
 			{
 				runCounter += 1;
@@ -62,18 +67,28 @@ int main()
 					{
 						runAction = 2;
 						newSnapshot = addSnapshot();
-						addProcesses(runCounter, newSnapshot, NULL);
+						StartSnapshotCreation(runCounter, newSnapshot, NULL);
+						printf("\n+The run ended with sum of %d snapshots",runCounter);
 					}
 				}
 			}
 			break;
 
 		case 'V':
-		case 'v':printf("\n\nThere is no working run right now");
+		case 'v':printf("\n\n-There is no working run right now");
 			break;
 
 		case 'G':
-		case 'g':;
+		case 'g':
+			runAction=GenerateHomePage(snapshotHead);
+			if(runAction == 0)
+			{
+				printf("\n\n+Html file generated");
+			}
+			else
+			{
+				printf("\n\n-failed to generate html file");
+			}
 			break;
 
 		case 'R':
@@ -113,7 +128,7 @@ int main()
 			break;
 
 		default:
-			printf("\n\nPlease enter a valid char\n\n");
+			printf("\n\n-Please enter a valid char\n\n");
 			break;
 		}
 	}

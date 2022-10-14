@@ -1,0 +1,56 @@
+* {
+    padding: 0;
+    margin: 0;
+    }
+    
+    body{
+    background-color:#EEEEEE ;
+    font-weight: bold;
+  margin:0;
+  text-align: center;
+  font-family: 'Poppins', sans-serif;
+    }
+    
+    .navTable{
+        height:50px;
+        width: 250px;
+        margin: 45px auto;
+        background-color: #222831;
+        border-radius: 15px;
+        text-align: center;
+    }
+    .navTable td{
+        width: 50%;
+    }
+    
+    .navTable a{
+        font-family: 'Lato', sans-serif;
+        font-weight: 700;
+        text-decoration: none;
+        text-align: center;
+        color: #A1C298;
+        display: inline-block;
+        position: relative;
+        transition-property: color;
+        transition-duration: 0.5s;
+        
+    }
+    
+    .navTable a:hover{
+    color: white;
+    }
+
+     .profile{
+    position: relative;
+    vertical-align: middle;
+    text-align: center;
+
+    }
+    
+
+      h2{
+        color: #A1C298;
+        font-size: 2.5rem;
+        font-weight: normal;
+        
+      }

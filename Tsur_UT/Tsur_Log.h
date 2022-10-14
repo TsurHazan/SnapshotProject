@@ -6,6 +6,8 @@
 
 char currentTime(char arr[10000]);
 
+char ShortCurrentTime(char arr[10000]);
+
 void Log_Init(char filename[1000]);
 
 void Log_Error(char msg[1000]);
