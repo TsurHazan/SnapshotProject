@@ -46,6 +46,7 @@ snapshotProcess* addProcess(snapshot* snapshotPtr) {
 		newProcess->ProcessPlace = 1;
 		snapshotPtr->processHead = newProcess;
 		snapshotPtr->processTail = newProcess;
+		snapshotPtr->processAmount = 1;
 	}
 	else
 	{
@@ -53,6 +54,8 @@ snapshotProcess* addProcess(snapshot* snapshotPtr) {
 		snapshotPtr->processTail->next = newProcess;
 		newProcess->prev = snapshotPtr->processTail;
 		snapshotPtr->processTail = newProcess;
+		snapshotPtr->processAmount +=1;
+
 	}
 
 	newProcess->ProcessInfo.cb = 0;
@@ -81,6 +84,7 @@ dLL_Process* addDLL(snapshotProcess* ProcessPtr) {
 		newDLL->prev = NULL;
 		ProcessPtr->DLLhead = newDLL;
 		ProcessPtr->DLLTail = newDLL;
+		ProcessPtr->dllAmount = 1;
 	}
 	else
 	{
@@ -88,6 +92,7 @@ dLL_Process* addDLL(snapshotProcess* ProcessPtr) {
 		newDLL->prev = ProcessPtr->DLLTail;
 		newDLL->numberID = newDLL->prev->numberID + 1;
 		ProcessPtr->DLLTail = newDLL;
+		ProcessPtr->dllAmount = newDLL->numberID;
 	}
 	return newDLL;
 }
@@ -199,7 +204,7 @@ snapshotProcess* getProcess(DWORD processID, snapshot* newSnapshot, snapshotProc
 				size_t numConverted;
 				wcstombs_s(&numConverted, dllName, MAX_PATH, wDllName, MAX_PATH);
 				dLL_Process* tempDll = (dLL_Process*)malloc(sizeof(dLL_Process));
-
+				
 				if (newProcess->DLLhead == NULL)
 				{
 					tempDll = addDLL(newProcess);
@@ -241,9 +246,6 @@ snapshotProcess* getProcess(DWORD processID, snapshot* newSnapshot, snapshotProc
 			//found the process in the process list
 			else if ((signal = strcmp(currProcess->Name, shortProcessName)) == 0)
 			{
-
-				//check for new dll's, if a DLL isnt in the Process list then adding it to current Process list
-				DllDealer(hProcess, currProcess);
 
 				if (GetProcessMemoryInfo(hProcess, &pmc, sizeof(pmc)))
 				{
@@ -351,45 +353,41 @@ void StartSnapshotCreation(unsigned int SnapshotsCount, snapshot* newSnapshot,sn
 	StartSnapshotCreation(SnapshotsCount - 1, newSnapshot, currProcess);
 }
 
-
-//free and reset a process dll list
-void ResetDll(dLL_Process* currDllTail)
-{
-	dLL_Process* tempPtr;
-
-	while (currDllTail != NULL)
-	{
-		tempPtr = currDllTail;
-		currDllTail = currDllTail->prev;
-		free(tempPtr);
-	}
-
-}
-
-//free and reset a snapshot process list
-void ResetProcess(snapshotProcess* currProcessTail) {
-
-	snapshotProcess* tempPtr;
-
-	while (currProcessTail != NULL)
-	{
-		tempPtr = currProcessTail;
-		currProcessTail = currProcessTail->prev;
-		ResetDll(tempPtr->DLLTail);
-		free(tempPtr);
-	}
-}
-
 //free and reset all snapshots from bottom (dll) to top (the snapshot itself)
 void ResetSnapshots()
 {
-    snapshot* tempPtr;
+
+    snapshot* snapshotPtr;
+	snapshotProcess* processPtr;
+	dLL_Process* dllPtr;
+
 	while (snapshotTail != NULL)
 	{
-		tempPtr = snapshotTail;
+		snapshotPtr = snapshotTail;
 		snapshotTail = snapshotTail->prev;
-		ResetProcess(tempPtr->processTail);
-		free(tempPtr);
+
+		while (snapshotPtr->processTail != NULL)
+		{
+			processPtr = snapshotPtr->processTail;
+			snapshotPtr->processTail = snapshotPtr->processTail->prev;
+
+			while (processPtr->DLLTail != NULL)
+			{
+				if (processPtr->DLLhead==NULL)
+				{
+                 // cant free because there is no dll list
+					processPtr->DLLTail = NULL;
+				}
+				else
+				{
+					dllPtr = processPtr->DLLTail;
+					processPtr->DLLTail = processPtr->DLLTail->prev;
+					free(dllPtr);
+				}
+			}
+			free(processPtr);
+		}
+		free(snapshotPtr);
 	}
 	snapshotHead = NULL;
 }

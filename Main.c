@@ -7,7 +7,7 @@
 #include <Psapi.h>
 #include "Tsur_Log.h"
 #include "DataStructureAndFunctions.h"
-#include "HtmlTranslatorFile.h"
+#include "projectFilesTranslator.h"
 
 #pragma warning(disable:4996)
 
@@ -107,11 +107,13 @@ int main()
 			break;
 
 		case 'S':
-		case 's':;
+		case 's':
+			saveToFile();
 			break;
 
 		case 'L':
-		case 'l':;
+		case 'l':
+			readFile();
 			break;
 
 		case 'M':

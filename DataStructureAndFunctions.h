@@ -8,6 +8,9 @@
 #include "Tsur_Log.h"
 #pragma warning(disable:4996)
 
+
+
+
 // DLL Struct
 typedef struct DLL_Process
 {
@@ -24,6 +27,7 @@ typedef struct SnapshotProcess
 	char Name[MAX_PATH];
 	int ProcessID;
 	int ProcessPlace;
+	int dllAmount;
 	PROCESS_MEMORY_COUNTERS ProcessInfo;
 	dLL_Process* DLLhead;
 	dLL_Process* DLLTail;
@@ -36,6 +40,7 @@ typedef struct SnapshotProcess
 typedef struct Snapshot {
 	char timeCreated[100];
     int ID;
+	int processAmount;
 	snapshotProcess* processHead;
 	snapshotProcess* processTail;
 	struct Snapshot* next;
@@ -51,7 +56,6 @@ snapshotProcess* addProcess(snapshot* snapshotPtr);
 dLL_Process* addDLL(snapshotProcess* ProcessPtr);
 snapshotProcess* getProcess(DWORD processID, snapshot* newSnapshot, snapshotProcess* currProcess);
 void StartSnapshotCreation(unsigned int SnapshotsCount, snapshot* newSnapshot, snapshotProcess* currProcess);
-void DllDealer(HANDLE hProcess, snapshotProcess* currentProcess);
 void ResetSnapshots();
 void ResetProcess(snapshotProcess* currProcessTail);
 void ResetDll(dLL_Process* currDllTail);
