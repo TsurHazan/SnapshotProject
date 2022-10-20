@@ -43,14 +43,14 @@ snapshotProcess* addProcess(snapshot* snapshotPtr) {
 
 	if (snapshotPtr->processHead == NULL) {
 		newProcess->prev = NULL;
-		newProcess->ProcessPlace = 1;
+		//newProcess->ProcessPlace = 1;
 		snapshotPtr->processHead = newProcess;
 		snapshotPtr->processTail = newProcess;
 		snapshotPtr->processAmount = 1;
 	}
 	else
 	{
-		newProcess->ProcessPlace = snapshotPtr->processTail->ProcessPlace+1;
+		//newProcess->ProcessPlace = snapshotPtr->processTail->ProcessPlace+1;
 		snapshotPtr->processTail->next = newProcess;
 		newProcess->prev = snapshotPtr->processTail;
 		snapshotPtr->processTail = newProcess;
@@ -320,9 +320,10 @@ snapshotProcess* getProcess(DWORD processID, snapshot* newSnapshot, snapshotProc
 // function to get all the current procesess in the computer to a list and make a new snapshot
 void StartSnapshotCreation(unsigned int SnapshotsCount, snapshot* newSnapshot,snapshotProcess* currProcess) {
 
-	// if count equal to zero meaning is finished the last sum
+	// if count equal to zero meaning is finished the last sum and we can sort the snapshot
 	if (SnapshotsCount == 0)
 	{
+		sortProcesses(newSnapshot);
 		return 0;
 	}
 
@@ -351,6 +352,72 @@ void StartSnapshotCreation(unsigned int SnapshotsCount, snapshot* newSnapshot,sn
 	//wait a second before each snapshot
 	Sleep(1000);
 	StartSnapshotCreation(SnapshotsCount - 1, newSnapshot, currProcess);
+}
+
+void sortProcesses(snapshot* snaphotPtr)
+{
+
+	snapshotProcess* processPtr;
+	int signal = 1;
+	int place;
+
+	// for knowing there was no replace in the whole loop meaning its sorted
+	while (signal != 0)
+	{
+		signal = 0;
+		place = 1;
+		processPtr = snaphotPtr->processHead;
+
+		//keep going through all the list
+		while (processPtr != NULL)
+		{
+			//ptr is the last valueable in the list
+			if (processPtr->next == NULL) {
+
+			}
+			//if next process have less dll than switching with him    **equal=do nothing keep going.
+			else if (processPtr->dllAmount > processPtr->next->dllAmount)
+			{
+				// head and tail need special actions 
+				 if (processPtr == snaphotPtr->processHead) {
+
+					 processPtr->prev = processPtr->next;
+					 processPtr->next = processPtr->next->next;
+					 processPtr->prev->next = processPtr;
+					 processPtr->prev->prev = NULL;
+					 processPtr->next->prev = processPtr;
+
+					 snaphotPtr->processHead = processPtr->prev;
+				 }
+				 else if (processPtr->next == snaphotPtr->processTail)
+				 {
+					 processPtr->prev->next = processPtr->next;
+					 processPtr->next->prev = processPtr->prev;
+					 processPtr->next->next = processPtr;
+					 processPtr->prev = processPtr->next;
+					 processPtr->next = NULL;
+
+					 snaphotPtr->processTail = processPtr;
+				 }
+
+				 //regular switch in the list
+				 else
+				 {
+					 processPtr->prev->next = processPtr->next;
+					 processPtr->next->prev = processPtr->prev;
+					 processPtr->next->next->prev = processPtr;
+					 processPtr->prev = processPtr->next;
+					 processPtr->next = processPtr->next->next;
+					 processPtr->prev->next = processPtr;
+				 }
+				signal++;
+			}
+
+			processPtr->ProcessPlace = place;
+			place++;
+			processPtr = processPtr->next;
+		}
+	}
 }
 
 //free and reset all snapshots from bottom (dll) to top (the snapshot itself)
