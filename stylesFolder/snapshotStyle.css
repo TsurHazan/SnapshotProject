@@ -1,124 +1,124 @@
 * {
-padding: 0;
-margin: 0;
-}
-
-body{
-background-color:#EEEEEE ;
-justify-content: center;
-justify-items: center;
-text-align: center;
-}
-
-.navTable{
-    height:50px;
-    width: 250px;
-    margin: 45px auto;
-    background-color: #222831;
-    border-radius: 15px;
-    text-align: center;
-}
-.navTable td{
-    width: 50%;
-}
-
-.navTable a{
-    font-family: 'Lato', sans-serif;
-    font-weight: 700;
-    text-decoration: none;
-    text-align: center;
-    color: #00ADB5;
-    display: inline-block;
-    position: relative;
-    transition-property: color;
-    transition-duration: 0.5s;
+    padding: 0;
+    margin: 0;
+    }
     
-}
-
-.navTable a:hover{
-color: white;
-}
-
-.headTable{
-margin: auto;
-text-align: center;
-justify-content: center;
-color: #00ADB5;
-
-}
-
-.headTable td {
-    border-bottom:2px solid #222831;    
-}
-
-.headTable td p{
-margin: 0 20px 0 20px;
-}
-
-.processTable{
-color: #00ADB5;
-justify-content: center;
-margin: 10px auto;
-border:2px solid #222831;   
-width: 100%;
-border-radius: 15px;
-}
-
-.processTable,.processTable th{
-padding:5px 10px 5px 10px;
-}
-
-.processTable td{
-    background-color: #222831; 
+    body{
+    background-color:#EEEEEE ;
+    justify-content: center;
+    justify-items: center;
     text-align: center;
-    margin: 5px;
-    padding: 5px;
-    border:2px solid #222831;   
-}
-
-.target{
-    color: #00ADB5;
-    border-width: 0;
-    transition-property: color;
-    transition-duration: 0.5s;
-    text-decoration: none;
-
-}
-
-.target:hover{
+    }
+    
+    .navTable{
+        height:50px;
+        width: 250px;
+        margin: 45px auto;
+        background-color: #222831;
+        border-radius: 15px;
+        text-align: center;
+    }
+    .navTable td{
+        width: 50%;
+    }
+    
+    .navTable a{
+        font-family: 'Lato', sans-serif;
+        font-weight: 700;
+        text-decoration: none;
+        text-align: center;
+        color: #00ADB5;
+        display: inline-block;
+        position: relative;
+        transition-property: color;
+        transition-duration: 0.5s;
+        
+    }
+    
+    .navTable a:hover{
     color: white;
-}
-
-span{
-    display: none;
-    text-decoration: none;
-}
-
-:target span{
-    display: block;
-    color: #00ADB5;
-    cursor: text;
-    user-select: text;
-}
-
-.showList{
-
-color: #222831;
-padding: 5px;
-background-color: #00ADB5;
-border-radius: 22px;
-}
-
-.tablesDiv{
-
-    max-width: 1300px;
+    }
+    
+    .headTable{
     margin: auto;
-}
-.dllList{
     text-align: center;
-    margin: auto;
-}
-
-.closeList{
-    color: #E26868;
-}
+    justify-content: center;
+    color: #00ADB5;
+    
+    }
+    
+    .headTable td {
+        border-bottom:2px solid #222831;    
+    }
+    
+    .headTable td p{
+    margin: 0 20px 0 20px;
+    }
+    
+    .processTable{
+    color: #00ADB5;
+    justify-content: center;
+    margin: 10px auto;
+    border:2px solid #222831;   
+    width: 100%;
+    border-radius: 15px;
+    }
+    
+    .processTable,.processTable th{
+    padding:5px 10px 5px 10px;
+    }
+    
+    .processTable td{
+        background-color: #222831; 
+        text-align: center;
+        margin: 5px;
+        padding: 5px;
+        border:2px solid #222831;   
+    }
+    
+    .target{
+        color: #00ADB5;
+        border-width: 0;
+        transition-property: color;
+        transition-duration: 0.5s;
+        text-decoration: none;
+    
+    }
+    
+    .target:hover{
+        color: white;
+    }
+    
+    span{
+        display: none;
+        text-decoration: none;
+    }
+    
+    :target span{
+        display: block;
+        color: #00ADB5;
+        cursor: text;
+        user-select: text;
+    }
+    
+    .showList{
+    
+    color: #222831;
+    padding: 5px;
+    background-color: #00ADB5;
+    border-radius: 22px;
+    }
+    
+    .tablesDiv{
+    
+        max-width: 1300px;
+        margin: auto;
+    }
+    .dllList{
+        text-align: center;
+        margin: auto;
+    }
+    
+    .closeList{
+        color: #E26868;
+    }

@@ -13,6 +13,17 @@
 snapshot* addSnapshot() {
 
 	snapshot* newSnapshot = (snapshot*)malloc(sizeof(snapshot));
+	if (!newSnapshot)
+	{
+		Log_Warning(" while trying to malloc in addSnapshot");
+		Log_Error(GetLastError());
+		return 1;
+	}
+	else
+	{
+		Log_Event("Created snapshot");
+	}
+
 	currentTime(newSnapshot->timeCreated);
 	newSnapshot->next = NULL;
 	newSnapshot->processHead = NULL;
@@ -38,19 +49,28 @@ snapshot* addSnapshot() {
 snapshotProcess* addProcess(snapshot* snapshotPtr) {
 
 	snapshotProcess* newProcess = (snapshotProcess*)malloc(sizeof(snapshotProcess));
+	if (!newProcess)
+	{
+		Log_Warning(" while trying to malloc in addProcess");
+		Log_Error(GetLastError());
+		return 1;
+	}
+	else
+	{
+		Log_Event("Created process");
+	}
+
 	newProcess->next = NULL;
 	newProcess->DLLhead = NULL;
 
 	if (snapshotPtr->processHead == NULL) {
 		newProcess->prev = NULL;
-		//newProcess->ProcessPlace = 1;
 		snapshotPtr->processHead = newProcess;
 		snapshotPtr->processTail = newProcess;
 		snapshotPtr->processAmount = 1;
 	}
 	else
 	{
-		//newProcess->ProcessPlace = snapshotPtr->processTail->ProcessPlace+1;
 		snapshotPtr->processTail->next = newProcess;
 		newProcess->prev = snapshotPtr->processTail;
 		snapshotPtr->processTail = newProcess;
@@ -58,6 +78,7 @@ snapshotProcess* addProcess(snapshot* snapshotPtr) {
 
 	}
 
+	//initalize all information for next sums
 	newProcess->ProcessInfo.cb = 0;
 	newProcess->ProcessInfo.PageFaultCount = 0;
 	newProcess->ProcessInfo.PagefileUsage = 0;
@@ -76,6 +97,16 @@ snapshotProcess* addProcess(snapshot* snapshotPtr) {
 dLL_Process* addDLL(snapshotProcess* ProcessPtr) {
 
 	dLL_Process* newDLL = (dLL_Process*)malloc(sizeof(dLL_Process));
+	if (!newDLL)
+	{
+		Log_Warning(" while trying to malloc in addDLL");
+		Log_Error(GetLastError());
+		return 1;
+	}
+	else
+	{
+		Log_Event("Created dll");
+	}
 
 	newDLL->next = NULL;
 	if (ProcessPtr->DLLhead == NULL)
@@ -97,16 +128,6 @@ dLL_Process* addDLL(snapshotProcess* ProcessPtr) {
 	return newDLL;
 }
 
-
-void DllDealer(HANDLE hProcess,snapshotProcess* currentProcess)
-{
-
-	
-
-	
-}
-
-
 // function to get a process information and insert it to current snapshot
 snapshotProcess* getProcess(DWORD processID, snapshot* newSnapshot, snapshotProcess* currProcess)
 {
@@ -124,6 +145,7 @@ snapshotProcess* getProcess(DWORD processID, snapshot* newSnapshot, snapshotProc
 	char* ptrShortName;
 	unsigned int dllCount = 1;
 	char signal;
+	char errorMsg[100];
 
 	// Open process in order to receive information
 	hProcess = OpenProcess(PROCESS_QUERY_INFORMATION |
@@ -131,7 +153,7 @@ snapshotProcess* getProcess(DWORD processID, snapshot* newSnapshot, snapshotProc
 		FALSE, processID);
 	if (NULL == hProcess)
 	{
-		// Write to log a warning 
+		Log_Warning("access denied while trying to reach process");
 		return currProcess;
 	}
 
@@ -145,8 +167,7 @@ snapshotProcess* getProcess(DWORD processID, snapshot* newSnapshot, snapshotProc
 		// check if we got a name or not(more then 0 chars)
 		if (numConverted < 1)
 		{
-			// You better call GetLastError() here
-		    // Write To log
+			Log_Warning("access denied while trying to reach process name");
 			return currProcess;
 		}
 
@@ -160,14 +181,13 @@ snapshotProcess* getProcess(DWORD processID, snapshot* newSnapshot, snapshotProc
 	}
 	else
 	{
-		// You better call GetLastError() here
-		// Write To log
+		Log_Warning("Found problem with name");
 	}
 
 	//to check if its only one snapshot or a sum: "NULL" = 1snapshot\first time
 	if(currProcess == NULL)
 	{
-	  //if didnt returned meaning we can get all the information we want and function keep going
+	 //create new process and add it to the snapshot process list
 	  snapshotProcess* newProcess = addProcess(newSnapshot);
 	  
 	  strcpy(newProcess->Name, shortProcessName);
@@ -203,22 +223,15 @@ snapshotProcess* getProcess(DWORD processID, snapshot* newSnapshot, snapshotProc
 				char dllName[MAX_PATH];
 				size_t numConverted;
 				wcstombs_s(&numConverted, dllName, MAX_PATH, wDllName, MAX_PATH);
-				dLL_Process* tempDll = (dLL_Process*)malloc(sizeof(dLL_Process));
-				
-				if (newProcess->DLLhead == NULL)
+				dLL_Process* tempDll = addDLL(newProcess); 
+				strcpy(tempDll->Name, dllName);
+
+				if (tempDll->numberID > 1)
 				{
-					tempDll = addDLL(newProcess);
-					strcpy(tempDll->Name, dllName);
-				}
-				else
-				{
-					tempDll = addDLL(newProcess);
-					strcpy(tempDll->Name, dllName);
 					tempDll->numberID = tempDll->prev->numberID + 1;
 				}
-				
 			}
-
+			
 		}
 	  CloseHandle(hProcess);
 	  return newProcess;
@@ -289,22 +302,20 @@ snapshotProcess* getProcess(DWORD processID, snapshot* newSnapshot, snapshotProc
 									strcpy(newDLL->Name, dllName);
 									dllCount = newDLL->numberID + 1;
 								}
-								else if ((signal = strcmp(dllChecker->Name, dllName)) == 0) //found the dll in the dll list
+								//found the dll in the dll list
+								else if ((signal = strcmp(dllChecker->Name, dllName)) == 0) 
 								{
 									signal = strcmp(dllChecker->Name, dllName);
 									dllCount = currProcess->DLLTail->numberID + 1;
-
 								}
 								else
 								{
 									dllChecker = dllChecker->next;
 								}
-
 							}
 						}
 					}
 				}
-
 				processCount = newSnapshot->processTail->ProcessPlace + 1;
 			}
 			else
@@ -323,6 +334,7 @@ void StartSnapshotCreation(unsigned int SnapshotsCount, snapshot* newSnapshot,sn
 	// if count equal to zero meaning is finished the last sum and we can sort the snapshot
 	if (SnapshotsCount == 0)
 	{
+		Log_Event("Finished snapshot creation");
 		sortProcesses(newSnapshot);
 		return 0;
 	}
@@ -334,7 +346,7 @@ void StartSnapshotCreation(unsigned int SnapshotsCount, snapshot* newSnapshot,sn
 	// * Receive all process ID and put in aProcesses Array
 	if (!EnumProcesses(aProcesses, sizeof(aProcesses), &cbNeeded))
 	{
-		// Error. Write to log
+		Log_Error(GetLastError());
 		return 1;
 	}
 
@@ -354,12 +366,15 @@ void StartSnapshotCreation(unsigned int SnapshotsCount, snapshot* newSnapshot,sn
 	StartSnapshotCreation(SnapshotsCount - 1, newSnapshot, currProcess);
 }
 
+//bubble sort algorithem
 void sortProcesses(snapshot* snaphotPtr)
 {
-
+	
 	snapshotProcess* processPtr;
 	int signal = 1;
 	int place;
+
+	Log_Event("Started sorting processes");
 
 	// for knowing there was no replace in the whole loop meaning its sorted
 	while (signal != 0)
@@ -418,6 +433,7 @@ void sortProcesses(snapshot* snaphotPtr)
 			processPtr = processPtr->next;
 		}
 	}
+	Log_Event("Finished sorting");
 }
 
 //free and reset all snapshots from bottom (dll) to top (the snapshot itself)
@@ -427,6 +443,8 @@ void ResetSnapshots()
     snapshot* snapshotPtr;
 	snapshotProcess* processPtr;
 	dLL_Process* dllPtr;
+
+	Log_Event("ResetSnapshots function called");
 
 	while (snapshotTail != NULL)
 	{
@@ -457,4 +475,5 @@ void ResetSnapshots()
 		free(snapshotPtr);
 	}
 	snapshotHead = NULL;
+	Log_Event("ResetSnapshots function finished succesfully");
 }

@@ -23,5 +23,7 @@ extern struct DLL_Process;
 
 int GenerateHomePage(struct Snapshot* snapshotHead);
 int GenerateSnapshotPage(struct Snapshot* snapshotPtr, char* homePage);
+void generateAboutMe(char* homePage);
+char* getPath();
 int saveToFile();
 int readFile();

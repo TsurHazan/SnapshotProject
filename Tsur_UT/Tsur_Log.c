@@ -6,8 +6,7 @@
 #pragma warning(disable:4996)
 
 #define FOPEN_ERROR "File_OpenError.log"
-char FileAddress[1010];
-
+char FileAddress[300];
 time_t timeForLog;
 
 char currentTime(char* arr) {
@@ -68,10 +67,10 @@ void Log_Error(char msg[1000]) {
    }
    else
    {
-
+	   char currTime[50];
 	   char FullMsg[1000];
-	   currentTime(FullMsg);
-	   sprintf(FullMsg, "%s  ERROR - %s\n", FullMsg, msg);
+	   currentTime(currTime);
+	   sprintf(FullMsg, "%s  ERROR - %s\n", currTime, msg);
 	   fputs(FullMsg, f);
 
 	   fclose(f);

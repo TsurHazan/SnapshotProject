@@ -1,16 +1,19 @@
 * {
     padding: 0;
     margin: 0;
-    }
+}
     
-    body{
+  body{
     background-color:#EEEEEE ;
     font-weight: bold;
-  margin:0;
-  text-align: center;
-  font-family: 'Poppins', sans-serif;
+      margin:0;
+     text-align: center;
+     font-family: Consolas, 'Courier New', monospace;
+  }
+    p{
+      font-weight: 400;
+      font-size: large;
     }
-    
     .navTable{
         height:50px;
         width: 250px;
@@ -52,5 +55,88 @@
         color: #A1C298;
         font-size: 2.5rem;
         font-weight: normal;
-        
+        border-bottom:2px solid #222831;
+
+      }
+
+      h3{
+        color: #A1C298;
+        font-size: 2rem;
+        font-weight: normal;
+        display: inline-block;
+        border-bottom:2px solid #222831;
+      }
+
+       img{
+        border:2px solid #222831;
+        border-radius: 50%;
+        width: 200px;
+        height: 200px;
+      }
+
+      .Hobbies, .skills{
+        display: block;
+        margin: auto;
+        width: 75%;
+        height: 203px;
+      }
+
+      .Hobbies{
+        text-align: left;
+      }
+      .Hobbies img{
+        margin-right: auto;
+        display: inline-block;
+      }
+
+      .Hobbies p{
+        line-height: 1.7rem;
+        text-align: left;
+        margin-top: 10px;
+        font-weight: 400;
+      }
+      .Hobbies .insideDiv{
+        display: inline-block;
+        position: absolute;
+        left: 400px;
+      }
+
+      .skills{
+        text-align: right;
+        padding: 50px 0 25px 0;
+      }
+      .skills img{
+        margin-left: auto;
+        display: inline-block;
+      }
+      .skills p{
+        line-height: 1.7rem;
+        margin-top: 10px;
+        font-weight: 400;
+      }
+      .skills .insideDiv{
+        display: inline-block;
+        position: absolute;
+        right: 400px;
+      }
+      .main{
+        width: 250px;
+        margin: auto;
+      }
+      .footer{
+        margin: auto;
+        width: 200px;
+        height: 150px;
+      }
+      svg{
+        height: 30px;
+        width: 30px;
+        padding:10px;
+      }
+      
+      .footer img{
+
+        width: 100px;
+        height: 35px;
+        border-radius: 0;
       }
